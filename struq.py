@@ -64,7 +64,7 @@ def generate_training_data(data_dicts, prompt_dict_name, attack, tokenizer):
             if attack == 'Naive':
                 data_dicts_item['input'] += ' ' + injected_prompt[0].upper() + injected_prompt[1:]
             elif attack == 'Ignore':
-                data_dicts_item['input'] += ' ' + np.random.choice(IGNORE_ATTACK_SENTENCES['train']) + ' ' + injected_prompt
+                data_dicts_item['input'] += ' ' + np.random.choice(IGNORE_ATTACK_SENTENCES['train']).format(injected_prompt=injected_prompt)
             elif attack == 'Completion':
                 data_dicts_item['input'] += '\n\n' + DELIMITERS['SpclSpclSpcl'][2] + '\n' + ref_inst_resp.get(data_dicts_item['instruction'], data_dicts_item['output']) + '\n\n' + \
                                                      DELIMITERS['SpclSpclSpcl'][0] + '\n' + injected_prompt.capitalize()
