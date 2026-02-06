@@ -26,7 +26,7 @@ class AttackArguments:
     alignment: str = field(default='none', metadata={"help": "Alignment type."})
 
 @dataclass
-class TrainingArguments(trl.ORPOConfig):#transformers.TrainingArguments): # 
+class TrainingArguments(trl.DPOConfig):#transformers.TrainingArguments): # 
     cache_dir: Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
     model_max_length: int = field(
@@ -35,9 +35,6 @@ class TrainingArguments(trl.ORPOConfig):#transformers.TrainingArguments): #
     )
     downsample: Optional[bool] = field(default=True)
     lr_scale: Optional[bool] = field(default=True)
-    beta: float = field(default=0.1)
-    ref_model_init_kwargs: Optional[str] = field(default=None)
-    precompute_ref_log_probs: Optional[bool] = field(default=False)
     desirable_weight: Optional[float] = field(default=1)
     undesirable_weight: Optional[float] = field(default=1)
 

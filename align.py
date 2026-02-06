@@ -3,7 +3,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from trl import DPOTrainer, KTOTrainer, ORPOTrainer, KTOConfig, ORPOConfig
+from trl import DPOTrainer, KTOTrainer, ORPOTrainer, KTOConfig, ORPOConfig, DPOConfig
 import os, re, time
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Sequence
@@ -35,7 +35,8 @@ def generate_preference_data(clean_data_path, frontend_delimiters, attack, align
         preference_data = []
         if 'Completion' in attack:
             ref_inst_resp = {}
-            for ref_sample in jload('data/alpaca_data.json'):  ref_inst_resp[ref_sample['instruction'].replace(tokenizer.pad_token, '')] = ref_sample['output']
+            pad_token = tokenizer.pad_token if tokenizer.pad_token else tokenizer.eos_token
+            for ref_sample in jload('data/alpaca_data.json'):  ref_inst_resp[ref_sample['instruction'].replace(pad_token, '')] = ref_sample['output']
 
         for i in range(len(clean_data)):
             if clean_data[i].get("input", "") == "": continue
@@ -121,15 +122,25 @@ def align():
         tokenizer
     )
 
+    # Create reference model for DPO
+    ref_model = None
+    if attack_args.alignment == 'dpo':
+        ref_model = transformers.AutoModelForCausalLM.from_pretrained(
+            model_args.model_name_or_path,
+            cache_dir=training_args.cache_dir,
+            low_cpu_mem_usage=True,
+        )
+
     trainer = {
         'dpo': DPOTrainer,
         'kto': KTOTrainer,
         'orpo': ORPOTrainer,
         }[attack_args.alignment](
             model,
+            ref_model=ref_model,
             args=training_args,
             train_dataset=train_dataset,
-            tokenizer=tokenizer,
+            processing_class=tokenizer,
     )
 
     trainer.train()
